@@ -12,10 +12,11 @@ import Footer from './components/Footer';
 import ErrorNotification from './components/ErrorNotification';
 
 export const App: React.FC = () => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [todos, setTodos] = useState<Todo[]>([]);
   const [deletingTodos, setDeletingTodos] = useState<number[]>([]);
 
   const filtered = useMemo(
@@ -24,10 +25,18 @@ export const App: React.FC = () => {
   );
 
   const addTodo = useCallback((title: string) => {
+    setTempTodo({
+      id: 0,
+      userId: postService.USER_ID,
+      title: title,
+      completed: false,
+    });
     setLoading(true);
     postService
       .createTodo(title)
       .then(newTodo => {
+        setDeletingTodos(current => [...current, 0]);
+        setTempTodo(null);
         setTodos(currentTodos => [...currentTodos, newTodo]);
       })
       .catch(() => setErrorMessage('Unable to create todo'))
@@ -94,6 +103,14 @@ export const App: React.FC = () => {
               deletingTodos={deletingTodos}
             />
           ))}
+          {tempTodo && (
+            <TodoItem
+              key={tempTodo.id}
+              todo={tempTodo}
+              onDelete={deleteTodo}
+              deletingTodos={deletingTodos}
+            />
+          )}
         </section>
 
         {todos.length > 0 && (
