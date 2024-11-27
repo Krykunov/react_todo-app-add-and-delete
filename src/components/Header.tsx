@@ -6,11 +6,17 @@ import Form from './Form';
 
 type Props = {
   todos: Todo[];
-  onCreateTodo: (todoTitle: string) => void;
+  onCreateTodo: (todoTitle: string) => Promise<void>;
   loading: boolean;
+  setErrorMessage: (message: string) => void;
 };
 
-const Header: React.FC<Props> = ({ todos, onCreateTodo, loading }) => {
+const Header: React.FC<Props> = ({
+  todos,
+  onCreateTodo,
+  loading,
+  setErrorMessage,
+}) => {
   return (
     <header className="todoapp__header">
       <button
@@ -22,7 +28,11 @@ const Header: React.FC<Props> = ({ todos, onCreateTodo, loading }) => {
       />
 
       {/* Add a todo on form submit */}
-      <Form onCreateTodo={onCreateTodo} loading={loading} />
+      <Form
+        onCreateTodo={onCreateTodo}
+        loading={loading}
+        setErrorMessage={setErrorMessage}
+      />
     </header>
   );
 };

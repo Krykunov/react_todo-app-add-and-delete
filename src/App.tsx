@@ -10,12 +10,14 @@ import TodoItem from './components/TodoItem';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ErrorNotification from './components/ErrorNotification';
+import DevHelper from './components/DevHelper';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [deletingTodos, setDeletingTodos] = useState<number[]>([]);
 
@@ -24,7 +26,7 @@ export const App: React.FC = () => {
     [todos, activeFilter],
   );
 
-  const addTodo = useCallback((title: string) => {
+  const addTodo = (title: string) => {
     setTempTodo({
       id: 0,
       userId: postService.USER_ID,
@@ -32,16 +34,23 @@ export const App: React.FC = () => {
       completed: false,
     });
     setLoading(true);
-    postService
+
+    return postService
       .createTodo(title)
       .then(newTodo => {
         setDeletingTodos(current => [...current, 0]);
-        setTempTodo(null);
+
         setTodos(currentTodos => [...currentTodos, newTodo]);
       })
-      .catch(() => setErrorMessage('Unable to create todo'))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => {
+        setErrorMessage('Unable to add a todo');
+        throw new Error('Unable to add a todo');
+      })
+      .finally(() => {
+        setTempTodo(null);
+        setLoading(false);
+      });
+  };
 
   const loadTodos = useCallback(() => {
     setLoading(true);
@@ -60,7 +69,10 @@ export const App: React.FC = () => {
       .then(() => {
         setTodos(currentTodos => currentTodos.filter(todo => todo.id !== id));
       })
-      .catch(() => setErrorMessage('Unable to load todos'))
+      .catch(() => {
+        setErrorMessage('Unable to delete a todo');
+        setDeletingTodos([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -89,28 +101,45 @@ export const App: React.FC = () => {
 
   return (
     <div className="todoapp">
+      {/*'remove before deploy !!!'*/}
+      <DevHelper
+        onSetFakeTodos={addTodo}
+        onDeleteAllTodos={deleteTodo}
+        todos={todos}
+      />
+      {/*'remove before deploy !!!'*/}
       <h1 className="todoapp__title">todos</h1>
-
       <div className="todoapp__content">
-        <Header todos={todos} onCreateTodo={addTodo} loading={loading} />
+        <Header
+          todos={todos}
+          onCreateTodo={addTodo}
+          loading={loading}
+          setErrorMessage={setErrorMessage}
+        />
 
         <section className="todoapp__main" data-cy="TodoList">
-          {filtered.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onDelete={deleteTodo}
-              deletingTodos={deletingTodos}
-            />
-          ))}
-          {tempTodo && (
-            <TodoItem
-              key={tempTodo.id}
-              todo={tempTodo}
-              onDelete={deleteTodo}
-              deletingTodos={deletingTodos}
-            />
-          )}
+          <TransitionGroup>
+            {filtered.map(todo => (
+              <CSSTransition key={todo.id} timeout={300} classNames="item">
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  onDelete={deleteTodo}
+                  deletingTodos={deletingTodos}
+                />
+              </CSSTransition>
+            ))}
+            {tempTodo && (
+              <CSSTransition key={0} timeout={300} classNames="item">
+                <TodoItem
+                  key={tempTodo.id}
+                  todo={tempTodo}
+                  onDelete={deleteTodo}
+                  deletingTodos={deletingTodos}
+                />
+              </CSSTransition>
+            )}
+          </TransitionGroup>
         </section>
 
         {todos.length > 0 && (
@@ -122,9 +151,6 @@ export const App: React.FC = () => {
           />
         )}
       </div>
-
-      {loading && <div className="loading">Loading...</div>}
-
       <ErrorNotification
         errorMessage={errorMessage}
         setErrorMessage={setErrorMessage}

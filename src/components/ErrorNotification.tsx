@@ -3,8 +3,8 @@ import React from 'react';
 import cn from 'classnames';
 
 type Props = {
-  errorMessage: string;
-  setErrorMessage: (message: string) => void;
+  errorMessage: string | null;
+  setErrorMessage: (message: string | null) => void;
 };
 
 const ErrorNotification: React.FC<Props> = ({
@@ -14,7 +14,7 @@ const ErrorNotification: React.FC<Props> = ({
   return (
     <div
       className={cn('notification is-danger is-light has-text-weight-normal', {
-        hidden: errorMessage === '',
+        hidden: !errorMessage,
       })}
       data-cy="ErrorNotification"
     >
@@ -22,7 +22,7 @@ const ErrorNotification: React.FC<Props> = ({
         data-cy="HideErrorButton"
         type="button"
         className="delete"
-        onClick={() => setErrorMessage('')}
+        onClick={() => setErrorMessage(null)}
       />
       {errorMessage}
     </div>

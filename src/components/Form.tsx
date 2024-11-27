@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 type Props = {
-  onCreateTodo: (todoTitle: string) => void;
+  onCreateTodo: (todoTitle: string) => Promise<void>;
   loading: boolean;
+  setErrorMessage: (message: string) => void;
 };
 
-const Form: React.FC<Props> = ({ onCreateTodo, loading }) => {
+const Form: React.FC<Props> = ({ onCreateTodo, loading, setErrorMessage }) => {
   const [todoTitle, setTodoTitle] = useState('');
 
   const titleField = useRef<HTMLInputElement>(null);
@@ -22,10 +23,13 @@ const Form: React.FC<Props> = ({ onCreateTodo, loading }) => {
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (todoTitle.trim() !== '') {
-      onCreateTodo(todoTitle);
-      setTodoTitle('');
+    if (todoTitle.trim() === '') {
+      setErrorMessage('Title should not be empty');
+
+      return;
     }
+
+    onCreateTodo(todoTitle).then(() => setTodoTitle(''));
   };
 
   return (
