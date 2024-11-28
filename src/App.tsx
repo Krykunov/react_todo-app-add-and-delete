@@ -4,21 +4,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import * as postService from './api/todos';
-import { Todo } from './types/Todo';
+import { Filters, Todo } from './types/Todo';
 import { filterTodos } from './utils/services';
 import TodoItem from './components/TodoItem';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ErrorNotification from './components/ErrorNotification';
-import DevHelper from './components/DevHelper';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<Filters>(Filters.All);
   const [deletingTodos, setDeletingTodos] = useState<number[]>([]);
 
   const filtered = useMemo(
@@ -33,7 +32,7 @@ export const App: React.FC = () => {
       title: title,
       completed: false,
     });
-    setLoading(true);
+    setIsLoading(true);
 
     return postService
       .createTodo(title)
@@ -48,21 +47,21 @@ export const App: React.FC = () => {
       })
       .finally(() => {
         setTempTodo(null);
-        setLoading(false);
+        setIsLoading(false);
       });
   };
 
   const loadTodos = useCallback(() => {
-    setLoading(true);
+    setIsLoading(true);
     postService
       .getTodos()
       .then(setTodos)
       .catch(() => setErrorMessage('Unable to load todos'))
-      .finally(() => setLoading(false));
+      .finally(() => setIsLoading(false));
   }, []);
 
   const deleteTodo = useCallback((id: number) => {
-    setLoading(true);
+    setIsLoading(true);
     setDeletingTodos(current => [...current, id]);
     postService
       .deleteTodo(id)
@@ -73,7 +72,7 @@ export const App: React.FC = () => {
         setErrorMessage('Unable to delete a todo');
         setDeletingTodos([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleClearCompleted = () => {
@@ -87,7 +86,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     loadTodos();
-  }, [loadTodos]);
+  }, []);
 
   useEffect(() => {
     if (errorMessage) {
@@ -101,19 +100,12 @@ export const App: React.FC = () => {
 
   return (
     <div className="todoapp">
-      {/*'remove before deploy !!!'*/}
-      <DevHelper
-        onSetFakeTodos={addTodo}
-        onDeleteAllTodos={deleteTodo}
-        todos={todos}
-      />
-      {/*'remove before deploy !!!'*/}
       <h1 className="todoapp__title">todos</h1>
       <div className="todoapp__content">
         <Header
           todos={todos}
           onCreateTodo={addTodo}
-          loading={loading}
+          isLoading={isLoading}
           setErrorMessage={setErrorMessage}
         />
 

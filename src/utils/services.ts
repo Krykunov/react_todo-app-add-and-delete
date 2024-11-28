@@ -1,15 +1,12 @@
-import { Todo } from '../types/Todo';
+import { Filters, Todo } from '../types/Todo';
 
-export const filterTodos = (todos: Todo[], status: string) => {
-  return todos.filter(todo => {
-    if (status === 'active') {
-      return !todo.completed;
-    }
-
-    if (status === 'completed') {
-      return todo.completed;
-    }
-
-    return true;
-  });
+export const filterTodos = (todos: Todo[], status: Filters): Todo[] => {
+  switch (status) {
+    case Filters.Active:
+      return todos.filter(todo => !todo.completed);
+    case Filters.Completed:
+      return todos.filter(todo => todo.completed);
+    default:
+      return todos;
+  }
 };

@@ -7,14 +7,14 @@ import Form from './Form';
 type Props = {
   todos: Todo[];
   onCreateTodo: (todoTitle: string) => Promise<void>;
-  loading: boolean;
+  isLoading: boolean;
   setErrorMessage: (message: string) => void;
 };
 
 const Header: React.FC<Props> = ({
   todos,
   onCreateTodo,
-  loading,
+  isLoading,
   setErrorMessage,
 }) => {
   return (
@@ -30,7 +30,7 @@ const Header: React.FC<Props> = ({
       {/* Add a todo on form submit */}
       <Form
         onCreateTodo={onCreateTodo}
-        loading={loading}
+        isLoading={isLoading}
         setErrorMessage={setErrorMessage}
       />
     </header>

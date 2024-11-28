@@ -2,20 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 
 type Props = {
   onCreateTodo: (todoTitle: string) => Promise<void>;
-  loading: boolean;
+  isLoading: boolean;
   setErrorMessage: (message: string) => void;
 };
 
-const Form: React.FC<Props> = ({ onCreateTodo, loading, setErrorMessage }) => {
+const Form: React.FC<Props> = ({
+  onCreateTodo,
+  isLoading,
+  setErrorMessage,
+}) => {
   const [todoTitle, setTodoTitle] = useState('');
 
   const titleField = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (titleField.current && !loading) {
+    if (titleField.current && !isLoading) {
       titleField.current.focus();
     }
-  }, [loading]);
+  }, [isLoading]);
 
   const handleTitleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTodoTitle(event.target.value);
@@ -35,7 +39,7 @@ const Form: React.FC<Props> = ({ onCreateTodo, loading, setErrorMessage }) => {
   return (
     <form onSubmit={handleFormSubmit}>
       <input
-        disabled={loading}
+        disabled={isLoading}
         ref={titleField}
         data-cy="NewTodoField"
         type="text"

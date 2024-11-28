@@ -1,11 +1,12 @@
 import React from 'react';
 
 import cn from 'classnames';
+import { Filters } from '../types/Todo';
 
 type Props = {
-  activeFilter: string;
-  setActiveFilter: (filter: string) => void;
-  filterItem: string;
+  activeFilter: Filters;
+  setActiveFilter: (filter: Filters) => void;
+  filterItem: Filters;
 };
 
 const FilterButton: React.FC<Props> = ({
@@ -13,9 +14,10 @@ const FilterButton: React.FC<Props> = ({
   setActiveFilter,
   filterItem,
 }) => {
+  const isSelectedFilter = activeFilter === filterItem;
   const filterName = filterItem.charAt(0).toUpperCase() + filterItem.slice(1);
   const handleFilterClick = () => {
-    if (activeFilter !== filterItem) {
+    if (!isSelectedFilter) {
       setActiveFilter(filterItem);
     }
   };
@@ -25,7 +27,7 @@ const FilterButton: React.FC<Props> = ({
       key={filterItem}
       href={`#/${filterItem}`}
       className={cn('filter__link', {
-        selected: activeFilter === filterItem,
+        selected: isSelectedFilter,
       })}
       data-cy={`FilterLink${filterName}`}
       onClick={handleFilterClick}

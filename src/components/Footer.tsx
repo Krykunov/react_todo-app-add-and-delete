@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { Todo } from '../types/Todo';
-import { filters } from '../data/filters';
+import { Filters, Todo } from '../types/Todo';
 import FilterButton from './FilterButton';
 
 type Props = {
   todos: Todo[];
-  activeFilter: string;
-  setActiveFilter: (filter: string) => void;
+  activeFilter: Filters;
+  setActiveFilter: (filter: Filters) => void;
   handleClearCompleted: () => void;
 };
 
@@ -26,16 +25,14 @@ const Footer: React.FC<Props> = ({
       </span>
 
       <nav className="filter" data-cy="Filter">
-        {filters.map(filterItem => {
-          return (
-            <FilterButton
-              key={filterItem}
-              activeFilter={activeFilter}
-              setActiveFilter={setActiveFilter}
-              filterItem={filterItem}
-            />
-          );
-        })}
+        {Object.values(Filters).map(filterItem => (
+          <FilterButton
+            key={filterItem}
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+            filterItem={filterItem}
+          />
+        ))}
       </nav>
 
       <button
